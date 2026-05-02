@@ -9,8 +9,10 @@ The loop is: **code context → explanation → quiz → feedback → adaptive d
 ## Glossary
 
 - **Extension_Host**: The TypeScript process running inside VS Code that registers commands, manages the webview panel, orchestrates services, and communicates with the Sidebar_Webview.
-- **Sidebar_Webview**: The React-based VS Code sidebar panel that renders explanations, quizzes, feedback, and gamification state to the learner.
+- **Sidebar_Webview**: The React-based VS Code sidebar view that renders explanations, quizzes, feedback, and gamification state to the learner. Hosted by a `WebviewViewProvider` registered in `contributes.views`.
+- **TutorViewProvider**: The `WebviewViewProvider` implementation (`src/panels/TutorViewProvider.ts`) that manages the sidebar webview lifecycle, loads the bundled React app, and routes typed messages between the Extension_Host and the Sidebar_Webview.
 - **Tutor_Service**: The orchestration service (`src/services/tutor.ts`) that coordinates the full tutor loop from code context extraction through state persistence.
+- **ActiveQuizSession**: An in-memory data structure tracking the current TutorResponse and the number of answer attempts for the active quiz. Used to determine when to reveal the correct answer. Not persisted.
 - **Context_Service**: The service (`src/services/context.ts`) that extracts selected code, language ID, filename, and diagnostics from the active VS Code editor.
 - **Gemini_Service**: The service (`src/services/gemini.ts`) that sends prompts to the Gemini API and returns raw responses for validation.
 - **Prompt_Builder**: The modules in `src/prompts/` that construct structured prompts for Gemini, including code context, difficulty, and concept parameters.
@@ -73,10 +75,10 @@ The loop is: **code context → explanation → quiz → feedback → adaptive d
 #### Acceptance Criteria
 
 1. WHEN the learner selects an answer choice and submits, THE Sidebar_Webview SHALL send the selected answer to the Extension_Host via a typed message.
-2. WHEN the Extension_Host receives a quiz answer, THE Tutor_Service SHALL compare the submitted answer against the TutorResponse's `correctAnswer` field and determine correctness.
+2. WHEN the Extension_Host receives a quiz answer, THE Tutor_Service SHALL compare the submitted answer against the TutorResponse's `correctAnswer` field locally and determine correctness. Quizzes are multiple-choice and graded locally without a Gemini call.
 3. WHEN the submitted answer is correct, THE Sidebar_Webview SHALL display a positive feedback message and the quiz explanation.
-4. WHEN the submitted answer is incorrect, THE Sidebar_Webview SHALL display the hint from the TutorResponse and indicate the answer was incorrect without revealing the correct answer immediately.
-5. WHEN the submitted answer is incorrect and `shouldRevealAnswer` conditions are met after repeated attempts, THE Sidebar_Webview SHALL reveal the correct answer along with the full quiz explanation.
+4. WHEN the submitted answer is incorrect, THE Sidebar_Webview SHALL display the hint from the TutorResponse and indicate the answer was incorrect without revealing the correct answer immediately. THE Tutor_Service SHALL increment the attempt counter in the ActiveQuizSession.
+5. WHEN the submitted answer is incorrect and the ActiveQuizSession attempt count reaches 2 or more, THE Sidebar_Webview SHALL reveal the correct answer along with the full quiz explanation.
 
 ### Requirement 5: Adaptive Difficulty Adjustment
 
@@ -101,7 +103,7 @@ The loop is: **code context → explanation → quiz → feedback → adaptive d
 #### Acceptance Criteria
 
 1. WHEN the learner submits a correct quiz answer, THE Gamification_Service SHALL award 10 XP.
-2. WHEN the learner completes an explanation and quiz attempt (regardless of correctness), THE Gamification_Service SHALL award 5 XP.
+2. WHEN the learner submits any quiz answer (regardless of correctness), THE Gamification_Service SHALL award 5 XP. This is the only trigger for the attempt bonus — generating an explanation alone does not award XP.
 3. WHEN the learner answers correctly while `recoveryState` is "recovering", THE Gamification_Service SHALL award an additional 5 bonus XP for recovery success.
 4. THE Gamification_Service SHALL calculate level as `Math.floor(totalXp / 100) + 1`, capped at 10.
 5. WHEN the learner completes at least one quiz on a calendar day, THE Gamification_Service SHALL increment the current streak by 1 if the previous streak day was the prior calendar day, or reset the streak to 1 if more than one calendar day has passed since the last quiz.
@@ -115,8 +117,8 @@ The loop is: **code context → explanation → quiz → feedback → adaptive d
 
 #### Acceptance Criteria
 
-1. WHEN ConceptMastery or GamificationState changes, THE Storage_Service SHALL write the updated state to VS Code globalState.
-2. WHEN the extension activates, THE Storage_Service SHALL read ConceptMastery and GamificationState from VS Code globalState and provide the data to the Adaptive_Engine and Gamification_Service.
+1. WHEN ConceptMastery changes, THE Storage_Service SHALL write the updated state to VS Code workspaceState (per-workspace learning progress).
+2. WHEN GamificationState changes, THE Storage_Service SHALL write the updated state to VS Code globalState (shared across workspaces).
 3. THE Storage_Service SHALL store API keys exclusively in VS Code SecretStorage, separate from progress data.
 4. THE Storage_Service SHALL not persist raw code snippets, full source files, or full chat transcripts.
 5. IF the Storage_Service encounters corrupted or missing state data on read, THEN THE Storage_Service SHALL initialize default state values (mastery 0, XP 0, streak 0, Difficulty 1) and log a warning.
@@ -150,7 +152,18 @@ The loop is: **code context → explanation → quiz → feedback → adaptive d
 #### Acceptance Criteria
 
 1. THE Response_Validator SHALL validate every Gemini response against the TutorResponse Zod schema before the data is used by any service or sent to the Sidebar_Webview.
-2. THE Response_Validator SHALL validate answer feedback responses against the AnswerFeedback Zod schema.
-3. WHEN a Gemini response passes Zod validation, THE Response_Validator SHALL return a typed, validated object.
-4. WHEN a Gemini response fails Zod validation, THE Response_Validator SHALL return a structured error containing the validation failure details.
-5. FOR ALL valid TutorResponse objects, parsing the object to JSON and validating the JSON against the TutorResponse Zod schema SHALL produce an equivalent validated object (round-trip property).
+2. WHEN a Gemini response passes Zod validation, THE Response_Validator SHALL return a typed, validated object.
+3. WHEN a Gemini response fails Zod validation, THE Response_Validator SHALL return a structured error containing the validation failure details.
+4. FOR ALL valid TutorResponse objects, parsing the object to JSON and validating the JSON against the TutorResponse Zod schema SHALL produce an equivalent validated object (round-trip property).
+
+### Requirement 11: Gemini API Key Setup
+
+**User Story:** As a learner, I want to configure my Gemini API key through a simple command, so that the extension can generate explanations and quizzes.
+
+#### Acceptance Criteria
+
+1. THE Extension_Host SHALL register a `vybeTutor.setApiKey` command.
+2. WHEN the learner invokes the `setApiKey` command, THE Extension_Host SHALL prompt the user with a password input box and store the key in VS Code SecretStorage under `vybeTutor.apiKey`.
+3. WHEN the API key is successfully stored, THE Extension_Host SHALL display a confirmation message.
+4. THE Extension_Host SHALL never send the API key to the Sidebar_Webview.
+5. WHEN the Gemini_Service detects a missing API key, THE Extension_Host SHALL prompt the learner to configure the key via the `setApiKey` command.

@@ -46,7 +46,7 @@ graph TB
         AE[Adaptive Engine<br/>Difficulty Logic]
         GF[Gamification Service<br/>XP/Level/Streak]
         SS[Storage Service<br/>Persistence]
-        TP[TutorPanel<br/>Webview Manager]
+        TP[TutorViewProvider<br/>Sidebar View]
     end
 
     subgraph "Sidebar Webview (React)"
@@ -155,6 +155,7 @@ export function deactivate(): void
 // Registered commands:
 // - "vybeTutor.explainSelection" → explainSelection command handler
 // - "vybeTutor.openPanel" → openTutorPanel command handler
+// - "vybeTutor.setApiKey" → prompt for Gemini API key, store in SecretStorage
 ```
 
 ### 2. Context Service (`src/services/context.ts`)
@@ -192,18 +193,21 @@ interface TutorService {
 1. Check pause state — if paused, do nothing.
 2. Look up current ConceptMastery for the concept (if known from prior sessions).
 3. Call Prompt Builder with context + current difficulty.
-4. Call Gemini Service.
+4. Call Gemini Service (or use mock mode if configured).
 5. Validate response with Response Validator.
 6. Apply guardrails.
-7. Send validated data to webview via TutorPanel.
-8. Award 5 XP for explanation + quiz attempt after quiz is attempted.
+7. Send validated data to webview via TutorViewProvider.
+8. Create a new ActiveQuizSession with attempts = 0.
 
 **Orchestration flow for `handleAnswer`**:
-1. Grade the answer against `correctAnswer`.
-2. Call Adaptive Engine to update mastery state.
-3. Call Gamification Service to update XP/streak.
-4. Persist updated state via Storage Service.
-5. Send feedback message to webview.
+1. Grade the answer locally against `correctAnswer` (case-insensitive, trimmed comparison). No Gemini call needed — quizzes are multiple-choice.
+2. Increment `activeQuizSession.attempts`.
+3. Determine `shouldRevealAnswer` = `!isCorrect && attempts >= 2`.
+4. Call Adaptive Engine to update mastery state.
+5. Call Gamification Service to award XP: +5 XP for any submission, +10 XP if correct, +5 bonus if correct while recovering.
+6. Update streak.
+7. Persist updated state via Storage Service.
+8. Send feedback message to webview.
 
 ### 4. Prompt Builder (`src/prompts/`)
 
@@ -335,9 +339,9 @@ interface GamificationService {
 ```
 
 **XP rules**:
-- Correct answer: +10 XP
-- Explanation + quiz attempt: +5 XP
-- Recovery success (correct while recovering): +5 bonus XP
+- +5 XP when the learner submits any quiz answer (the only trigger for attempt XP — generating an explanation alone does not award XP)
+- +10 XP if the answer is correct
+- +5 bonus XP if correct while recovering
 - No XP deduction for incorrect answers
 
 **Level**: `Math.floor(totalXp / 100) + 1`, capped at 10.
@@ -369,20 +373,20 @@ function createStorageService(context: vscode.ExtensionContext): StorageService
 
 **Constraints**: Never persists raw code snippets or full files. Initializes defaults on corrupted/missing data. Logs warnings on recovery.
 
-### 11. TutorPanel (`src/panels/TutorPanel.ts`)
+### 11. TutorViewProvider (`src/panels/TutorViewProvider.ts`)
 
-Manages the webview panel lifecycle and message routing.
+Implements `vscode.WebviewViewProvider` for a true VS Code sidebar view.
 
 ```ts
-class TutorPanel {
-  static createOrShow(extensionUri: vscode.Uri): TutorPanel;
+class TutorViewProvider implements vscode.WebviewViewProvider {
+  static readonly viewType = "vybeTutor.tutorView";
+  resolveWebviewView(webviewView: vscode.WebviewView): void;
   postMessage(message: HostToWebviewMessage): void;
   onDidReceiveMessage(handler: (msg: WebviewToHostMessage) => void): void;
-  dispose(): void;
 }
 ```
 
-**Constraints**: Validates outgoing messages against `HostToWebviewMessageSchema`. Routes incoming messages to the Tutor Service. Manages webview HTML/JS loading from the bundled React app.
+**Constraints**: Registered via `contributes.views` in package.json. Validates outgoing messages against `HostToWebviewMessageSchema`. Routes incoming messages to the Tutor Service. Manages webview HTML/JS loading from the bundled React app.
 
 ### 12. Webview Components (`webview/src/`)
 
@@ -521,7 +525,7 @@ type TutorResponse = {
 };
 ```
 
-### AnswerFeedback (Gemini output for free-text grading)
+### AnswerFeedback (stretch — for free-text grading via Gemini)
 
 ```ts
 type AnswerFeedback = {
@@ -532,6 +536,19 @@ type AnswerFeedback = {
   shouldRevealAnswer: boolean;
 };
 ```
+
+**Note**: For MVP, quizzes are multiple-choice and graded locally. AnswerFeedback is a stretch feature for free-text answer evaluation. The schema is defined but not used in the core loop.
+
+### ActiveQuizSession (in-memory, not persisted)
+
+```ts
+type ActiveQuizSession = {
+  tutorResponse: TutorResponse;
+  attempts: number;
+};
+```
+
+**Behavior**: Created when a new explanation is generated (attempts = 0). Incremented on each answer submission. When `attempts >= 2` and the answer is incorrect, `shouldRevealAnswer` is set to true in the feedback message. Reset when a new explanation is generated. Lives in Tutor Service memory only — not persisted to storage.
 
 ### CodeContext (internal, not persisted)
 
@@ -630,8 +647,8 @@ type CodeContext = {
 ### Property 11: XP award correctness
 
 *For any* GamificationState and any quiz outcome (correct, incorrect, recovering), the Gamification Service SHALL:
+- Add exactly 5 XP for any quiz answer submission (the only trigger — generating an explanation alone does not award XP).
 - Add exactly 10 XP for a correct answer.
-- Add exactly 5 XP for any explanation + quiz attempt.
 - Add exactly 5 bonus XP when the answer is correct and `recoveryState` is "recovering".
 - Never decrease `totalXp` for an incorrect answer.
 
