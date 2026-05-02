@@ -21,6 +21,11 @@ Gamification should make learning feel rewarding without distracting from coding
 - No harsh penalty for wrong answers.
 - Streak increments when the user completes at least one quiz on a calendar day.
 
+## Award timing
+- Award the +5 attempt XP when the learner submits a quiz answer, not merely when an explanation is generated.
+- Award correct-answer XP only once per quiz unless the team intentionally supports retry scoring.
+- Do not let users farm XP by repeatedly generating explanations without completing quizzes.
+
 ## Level model
 Use a simple deterministic level calculation for the demo.
 
@@ -41,6 +46,7 @@ Cap the displayed level at 10 unless the team implements more visuals.
 - Celebrate correct answers briefly but avoid noisy animations.
 - Use gamification to reinforce learning, not to shame mistakes.
 - Wrong answers should trigger hints and recovery, not punishment.
+- Daily streak bonus multipliers are stretch; keep MVP scoring deterministic.
 
 ## Local state model
 

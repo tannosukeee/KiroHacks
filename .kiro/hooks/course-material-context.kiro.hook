@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Enrich Explanation with Course Materials",
+  "description": "Before the Gemini explain-and-quiz prompt is sent, this hook reminds the agent to search imported course materials (lecture notes, syllabi, project specs) via the Course Material MCP and include relevant vocabulary, concepts, and examples from the student's actual class in the prompt context.",
+  "version": "1",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Before writing any Gemini prompt or explanation file, check if course materials are available via the Course Material MCP (search_course_materials, get_relevant_concepts, summarize_course_file). If course materials exist, search them for concepts related to the current code snippet and include relevant class-specific vocabulary, lecture references, and concept definitions in the explanation context. This personalizes the tutoring to the student's actual coursework. If no course materials MCP is configured, proceed normally without blocking."
+  }
+}

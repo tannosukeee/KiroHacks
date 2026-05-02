@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Validate Dataset Files on Edit",
+  "description": "When concept data files, quiz templates, or misconception datasets are created or edited, this hook reminds the agent to validate the data against the Dataset MCP schema and ensure entries include required fields like concept name, common misconceptions, beginner explanations, and quiz templates with proper difficulty levels.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "data/*.json",
+      "data/**/*.json",
+      ".vybe/**/*.json",
+      "src/test-data/**"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A dataset or concept file was edited. Validate that the file follows the Dataset MCP schema. Each concept entry should include: concept name (string), common_misconceptions (array of strings), beginner_explanation (string), and quiz_templates (array with difficulty levels 1-5). Verify that the data supports the Dataset MCP tools: lookup_concept, get_common_misconceptions, and get_quiz_templates. Check that difficulty levels are within the valid range {1, 2, 3, 4, 5} and that quiz templates have correct answer fields. Flag any missing or malformed entries. This ensures the structured tutoring dataset stays consistent and the app feels like a real tutoring system rather than just a Gemini wrapper."
+  }
+}

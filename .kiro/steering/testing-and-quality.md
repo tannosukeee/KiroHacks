@@ -16,6 +16,8 @@ Testing should protect the demo-critical learning loop and the deterministic log
 - Host-to-webview message payloads.
 - Quiz grading.
 - XP, level, and streak updates.
+- Pause/snooze state.
+- Materials import only after the core loop is stable.
 
 ## Rules
 - Write unit tests for pure logic.
@@ -24,6 +26,7 @@ Testing should protect the demo-critical learning loop and the deterministic log
 - Test difficulty changes after correct and incorrect answers.
 - Test recovery flow after a wrong answer.
 - Test that XP and streaks persist across storage reloads.
+- Test that pause does not break an already-earned daily streak.
 - Avoid relying on live API calls in tests.
 - Use deterministic demo snippets.
 
@@ -32,7 +35,8 @@ Testing should protect the demo-critical learning loop and the deterministic log
 - `gamification.test.ts`: XP increase, level calculation, daily streak, pause does not break completed-day streak.
 - `tutorResponse.test.ts`: valid Gemini JSON, invalid JSON, missing quiz fields, solution-like flag.
 - `storage.test.ts`: read/write mastery and gamification state.
-- `panelMessaging.test.ts`: host sends typed explanation and quiz payload to webview.
+- `panelMessaging.test.ts` or `viewMessaging.test.ts`: host sends typed explanation and quiz payload to webview.
+- `context.test.ts`: selected code and context window extraction.
 
 ## Demo QA checklist
 Before demoing:
@@ -44,3 +48,5 @@ Before demoing:
 - Wrong answer shows hint and easier retry.
 - State survives VS Code reload.
 - API failure shows retry instead of crashing.
+- Pause/snooze suppresses new generation.
+- UI is readable in VS Code light and dark themes.

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Sync Quiz Bank After Task Completion",
+  "description": "After a spec task is completed, this hook reminds the agent to update the Quiz Bank / Learning Progress MCP with any new concepts, quiz templates, or mastery data that were introduced during the task. This keeps the adaptive learning system in sync with implementation progress.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "After completing a task, check if the task introduced or modified any quiz-related logic, concept mastery data, adaptive difficulty rules, or gamification state. If so, verify that the Quiz Bank / Learning Progress MCP tools (get_user_mastery, record_quiz_attempt, recommend_next_difficulty, get_weakest_concepts) are consistent with the implementation. Ensure that any new concepts added to the codebase have corresponding entries in the local quiz bank (data/concepts.json, data/quizTemplates.json, or .vybe/progress.sqlite). Also verify that the adaptive engine's difficulty transitions match the mastery data schema. If no Quiz Bank MCP is configured, just verify the local data files are consistent."
+  }
+}

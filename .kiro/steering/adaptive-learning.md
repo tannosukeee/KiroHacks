@@ -22,6 +22,7 @@ The quiz system adjusts difficulty based on user performance while staying on th
 - Do not jump difficulty too aggressively.
 - Prefer explain -> hint -> easier question -> retry path.
 - The model can generate questions, but local code owns all state transitions.
+- Deep-dive questions may add concept signals, but should not replace quiz-based mastery updates.
 
 ## Transition rules
 

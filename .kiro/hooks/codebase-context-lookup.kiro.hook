@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Resolve Codebase Context for Explanations",
+  "description": "After a code explanation file is written or the tutor generates output, this hook reminds the agent to use the Local Codebase MCP to resolve symbol definitions, find related files, and trace imports so the explanation covers the full code flow rather than just the selected snippet.",
+  "version": "1",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "After writing explanation or tutor-related code, check if the explanation references any symbols (functions, classes, imports) that the student might not understand. Use the Local Codebase MCP tools (find_symbol_definition, get_related_files, get_project_tree, search_workspace) to resolve where those symbols are defined and what they do. If the MCP reveals important context (e.g., a function definition in another file, a relevant README section, or package dependencies), suggest enriching the explanation with that context. This makes the tutor feel much smarter than a basic 'explain selected code' wrapper. If no Local Codebase MCP is configured, proceed normally."
+  }
+}

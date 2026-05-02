@@ -11,10 +11,10 @@ Vybe Tutor is a local-first VS Code extension. The extension host gathers editor
 ## Core layers
 
 ### 1. Extension host
-Responsible for activation, command registration, editor access, save listeners, diagnostics, storage, Gemini orchestration, adaptive learning, and gamification state.
+Responsible for activation, command registration, editor access, save listeners, optional hover/deep-dive hooks, diagnostics, storage, Gemini orchestration, adaptive learning, and gamification state.
 
 ### 2. Context extraction layer
-Collects the selected code or recently changed code block, language ID, file name, cursor range, diagnostics, and a small context window. Prefer function/class scope plus nearby lines over entire files.
+Collects selected code, recently changed code, or hovered code context; language ID; file name; cursor/range metadata; diagnostics; and a small context window. Prefer function/class scope plus nearby lines over entire files.
 
 ### 3. AI orchestration layer
 Builds prompts, calls Gemini, validates structured responses with Zod, and applies guardrails before any data reaches the UI.
@@ -25,8 +25,11 @@ Uses deterministic local rules to choose next difficulty for the same concept. G
 ### 5. Gamification layer
 Tracks XP, levels, daily streaks, and basic progress state locally. Gamification should motivate learning without interrupting coding flow.
 
-### 6. Webview UI layer
-Renders the sidebar: level/streak header, explanation card, quiz section, hint area, feedback banner, difficulty indicator, and pause/import/settings controls.
+### 6. Materials layer
+Optionally imports PDF, DOCX, and TXT course materials, summarizes or indexes them locally, and provides small relevant topic summaries to Gemini prompts when the user asks to relate explanations to coursework.
+
+### 7. Webview UI layer
+Renders the sidebar: level/streak header, explanation card, quiz section, hint area, feedback banner, difficulty indicator, deep-dive input, and pause/import/settings controls.
 
 ## Layering rules
 1. The webview never calls Gemini directly.
@@ -38,9 +41,10 @@ Renders the sidebar: level/streak header, explanation card, quiz section, hint a
 7. All host-to-webview payloads must be typed and validated.
 8. Storage helpers stay separate from tutoring and UI logic.
 9. User-facing errors are friendly; internal logs can contain diagnostic detail.
+10. Imported course materials are optional and should be minimized before being used in prompts.
 
 ## Primary demo flow
-1. User highlights code or saves a file.
+1. User highlights code or triggers explanation on a recently changed block.
 2. Extension host extracts relevant code context.
 3. Tutor service builds a Gemini prompt for explanation and quiz.
 4. Gemini returns structured JSON.
@@ -52,6 +56,13 @@ Renders the sidebar: level/streak header, explanation card, quiz section, hint a
 10. Gamification service updates XP, level, and streak.
 11. Adaptive engine chooses next difficulty for the same concept.
 12. Local progress is saved.
+
+## Deep-dive flow
+1. User asks a follow-up question from the sidebar or inline explanation affordance.
+2. Extension host sends the current concept, selected code context, user question, and skill level to Gemini.
+3. Gemini returns a deeper explanation, examples, or conceptual breakdown.
+4. Zod validates the response and guardrails sanitize it if needed.
+5. The tutor service records concept signals locally so future quizzes can better target the user's confusion.
 
 ## Trigger policy
 - Manual command is the safest MVP path: `Vybe Tutor: Explain Selected Code`.
@@ -78,9 +89,9 @@ Use for:
 Use for:
 - workspace-specific concept mastery
 - recent quiz attempts
-- last explanations
+- last explanation metadata, not full raw code by default
 - recovery state by concept
-- imported course-material summaries or indexes
+- imported course-material summaries, indexes, or local file references
 
 ## Non-goals for MVP
 - cloud backend

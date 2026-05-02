@@ -1,6 +1,6 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: "src/prompts/**,src/schemas/**,src/services/gemini.ts,src/services/tutor.ts,src/utils/guardrails.ts,tests/unit/*Response*.test.ts"
+fileMatchPattern: "src/prompts/**,src/schemas/**,src/services/gemini.ts,src/services/tutor.ts,src/services/deepDive.ts,src/utils/guardrails.ts,tests/unit/*Response*.test.ts"
 ---
 
 # AI Output Contracts
@@ -17,8 +17,10 @@ All Gemini responses used by the extension must be structured, validated, and sa
 - Do not let the model decide XP, level, or streak updates.
 - The local adaptive engine decides difficulty.
 - The local gamification service decides XP, level, and streak state.
+- Deep-dive responses can influence future quiz focus through local concept signals, but must not directly mutate mastery without a quiz answer.
 
 ## Explanation and quiz response shape
+
 Use this shape for the main explanation flow:
 
 ```ts
@@ -42,8 +44,24 @@ Use this shape for the main explanation flow:
 }
 ```
 
+## Deep-dive response shape
+
+Use this shape for follow-up questions from the sidebar:
+
+```ts
+{
+  answer: string;
+  concept: string;
+  relatedConcepts: string[];
+  examples?: string[];
+  nextStudySuggestion?: string;
+  containsSolutionLikeOutput: boolean;
+}
+```
+
 ## Answer feedback response shape
-Use this shape only when Gemini is needed to evaluate free-text answers:
+
+Use this shape only when Gemini is needed to evaluate free-text answers. Multiple-choice grading should be local.
 
 ```ts
 {

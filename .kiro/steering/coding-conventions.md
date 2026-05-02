@@ -15,11 +15,12 @@ fileMatchPattern: "src/**,webview/src/**,tests/**"
 ## Naming conventions
 - Files: `camelCase.ts` for utilities and services.
 - React components: `PascalCase.tsx`.
-- Functions: `camelCase` with descriptive verbs, such as `buildTutorPrompt` or `updateMasteryState`.
+- Functions: `camelCase` with descriptive verbs, such as `buildTutorPrompt`, `updateMasteryState`, or `awardQuizXp`.
 - Types and interfaces: `PascalCase`.
 - Constants: `UPPER_SNAKE_CASE` for true constants.
 - Zod schemas: suffix with `Schema`.
 - Host/webview message types: suffix with `Message`.
+- VS Code sidebar view provider: `TutorViewProvider`.
 
 ## Extension architecture rules
 - Register commands in one clear place and keep activation predictable.
@@ -27,20 +28,21 @@ fileMatchPattern: "src/**,webview/src/**,tests/**"
 - Do not call Gemini from UI code.
 - Do not store secrets outside VS Code SecretStorage.
 - Do not put adaptive difficulty logic inside prompt text when it belongs in code.
-- Keep prompt builders, storage helpers, tutoring orchestration, and UI rendering separated.
+- Keep prompt builders, storage helpers, tutoring orchestration, materials ingestion, gamification, and UI rendering separated.
 
 ## Webview messaging
 - All messages between extension host and webview must use typed payloads.
 - Validate external, user-provided, and model-derived data before React renders it.
 - Prefer a small set of explicit message shapes over ad hoc objects.
 - Never trust webview input without validation.
+- Deep-dive questions from the webview are user input and must be validated before prompt construction.
 
 ## React conventions
 - Prefer small, focused components.
 - Keep presentational components separate from orchestration/state components.
 - Derive UI state from typed props where possible.
 - Avoid deeply nested JSX conditionals; move decision logic into helpers.
-- Use semantic component names like `ExplanationCard`, `QuizCard`, `MasteryBadge`, `XPProgressBar`, and `StreakCounter`.
+- Use semantic component names like `ExplanationCard`, `QuizCard`, `MasteryBadge`, `XPProgressBar`, `StreakCounter`, `DeepDiveInput`, and `CourseworkConnection`.
 
 ## Prompting and AI integration
 - Centralize prompts in `src/prompts/`.
@@ -48,6 +50,7 @@ fileMatchPattern: "src/**,webview/src/**,tests/**"
 - Model responses must be validated with Zod before use.
 - Add guardrail checks for solution-like output.
 - Keep prompt strings deterministic and easy to diff.
+- Pass skill level, current concept, difficulty, and course-material summaries only when available and relevant.
 
 ## Error handling
 - Fail gracefully with actionable messages in the UI.
@@ -61,6 +64,7 @@ fileMatchPattern: "src/**,webview/src/**,tests/**"
 - Name state fields clearly, such as `currentDifficulty`, `lastMissedDifficulty`, `recoveryState`, and `recentCorrect`.
 - Avoid hidden state transitions.
 - Prefer pure functions for mastery, difficulty, XP, level, and streak updates.
+- Do not persist raw source code unless a visible local-history feature explicitly requires it.
 
 ## Testing
 - Every core state transition in the adaptive engine should have a unit test.
