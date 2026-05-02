@@ -1,6 +1,6 @@
-# [PROJECT NAME]
+# Vybe Tutor
 
-> [One-line tagline]
+> A IDE extension to help students learn from vibe coding rather than exploit it. 
 
 ## What it does
 
@@ -8,7 +8,7 @@
 
 ## The problem we're solving
 
-[Concrete description of the social problem, ideally with statistics]
+Vibe coding has been a great tool for students, faculty, and companies alike. Yet, it can become a double-edged sword, especially for students. For example, students can blindly paste code without understanding what the code is doing or security concerns that come with the code. We aim to build an extension to provide real-time and inline for students when vibe coding. 
 
 ## How we built it
 
