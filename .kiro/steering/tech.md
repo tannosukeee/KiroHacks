@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Technology Stack
 
 This is an IDE extension, not a traditional web app.
