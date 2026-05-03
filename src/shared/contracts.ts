@@ -49,6 +49,24 @@ export const HostToWebviewMessageSchema = z.discriminatedUnion("type", [
     type: z.literal("error"),
     payload: z.object({ message: z.string() }).strict(),
   }).strict(),
+  z.object({
+    type: z.literal("mockExplanation"),
+    data: z.object({
+      concept: z.string(),
+      lineReference: z.string(),
+      explanation: z.string(),
+      codeTokens: z.array(z.string()),
+      language: z.string().optional(),
+      fileName: z.string().optional(),
+      quiz: z.object({
+        question: z.string(),
+        choices: z.array(z.string()),
+        correctAnswerIndex: z.number(),
+        hint: z.string(),
+        explanation: z.string(),
+      }),
+    }),
+  }),
 ]);
 
 export type HostToWebviewMessage = z.infer<typeof HostToWebviewMessageSchema>;
