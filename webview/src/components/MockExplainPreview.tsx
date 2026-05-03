@@ -117,12 +117,12 @@ export function MockExplainPreview({ data, gameState, onGameStateUpdate }: MockE
   return (
     <div className="space-y-4">
       {/* Line/concept title */}
-      <div className="text-xs text-[var(--vybe-subtle)] tracking-wide uppercase">
-        {data.lineReference} · <span className="text-[var(--vybe-amber)]">{data.concept}</span>
+      <div className="text-xs text-vybe-muted tracking-wide uppercase">
+        {data.lineReference} · <span className="text-vybe-mustang-gold">{data.concept}</span>
       </div>
 
       {/* Explanation text */}
-      <p className="text-sm leading-relaxed text-[var(--vybe-text)]">
+      <p className="text-sm leading-relaxed text-vybe-text">
         {data.explanation}
       </p>
 
@@ -131,7 +131,7 @@ export function MockExplainPreview({ data, gameState, onGameStateUpdate }: MockE
         {data.codeTokens.map((token, index) => (
           <span
             key={index}
-            className="px-2 py-1 text-xs rounded bg-[var(--vybe-chip-bg)] text-[var(--vybe-amber)] border border-[var(--vybe-border)]"
+            className="px-2 py-1 text-xs rounded bg-vybe-card text-vybe-mustang-gold border border-vybe-border"
           >
             {token}
           </span>
@@ -139,12 +139,12 @@ export function MockExplainPreview({ data, gameState, onGameStateUpdate }: MockE
       </div>
 
       {/* Divider */}
-      <div className="border-t border-[var(--vybe-border)] my-2" />
+      <div className="border-t border-vybe-border my-2" />
 
       {/* Quick check section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[var(--vybe-subtle)]">
+          <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-vybe-muted">
             QUICK CHECK · +10 XP
           </div>
           <DifficultyIndicator
@@ -153,7 +153,7 @@ export function MockExplainPreview({ data, gameState, onGameStateUpdate }: MockE
           />
         </div>
 
-        <p className="text-sm text-[var(--vybe-text)] leading-relaxed">
+        <p className="text-sm text-vybe-text leading-relaxed">
           {currentQuestion.question}
         </p>
 

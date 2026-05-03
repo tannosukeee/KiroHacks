@@ -55,7 +55,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--vybe-bg)] text-[var(--vybe-text)] font-[var(--vybe-mono)]">
+    <div className="min-h-screen bg-vybe-bg text-vybe-text font-[var(--vybe-mono)]">
       <HeaderBar isLive={isLive} gameState={gameState} />
       <main className="p-4">
         {explanationData ? (

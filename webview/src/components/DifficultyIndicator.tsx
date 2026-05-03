@@ -10,17 +10,17 @@ export function DifficultyIndicator({ difficulty, previousDifficulty }: Difficul
   const currentLabel = getDifficultyLabel(difficulty);
 
   return (
-    <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[var(--vybe-subtle)]">
+    <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-vybe-muted">
       {previousDifficulty !== undefined && previousDifficulty !== difficulty ? (
         <span>
           DIFFICULTY:{' '}
-          <span className="text-[var(--vybe-muted)]">{getDifficultyLabel(previousDifficulty)}</span>
+          <span className="text-vybe-muted">{getDifficultyLabel(previousDifficulty)}</span>
           {' → '}
-          <span className="text-[var(--vybe-amber)]">{currentLabel}</span>
+          <span className="text-vybe-mustang-gold">{currentLabel}</span>
         </span>
       ) : (
         <span>
-          DIFFICULTY: <span className="text-[var(--vybe-muted)]">{currentLabel}</span>
+          DIFFICULTY: <span className="text-vybe-muted">{currentLabel}</span>
         </span>
       )}
     </div>

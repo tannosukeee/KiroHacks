@@ -17,13 +17,13 @@ export function ChoiceButton({ label, text, state, onClick }: ChoiceButtonProps)
 
   const stateClasses: Record<ChoiceState, string> = {
     default:
-      'bg-[var(--vybe-panel)] border-[var(--vybe-border)] text-[var(--vybe-text)] hover:border-[var(--vybe-amber)] hover:bg-[var(--vybe-panel-raised)] cursor-pointer',
+      'bg-vybe-card border-vybe-border-muted text-vybe-text hover:border-vybe-mustang-gold hover:bg-vybe-card-raised hover:shadow-[0_0_6px_rgba(189,139,19,0.15)] cursor-pointer',
     correct:
-      'bg-[var(--vybe-panel-raised)] border-[var(--vybe-amber)] text-[var(--vybe-amber)] cursor-default',
+      'bg-vybe-card-raised border-vybe-dexter-green text-vybe-stadium-gold cursor-default',
     incorrect:
-      'bg-[var(--vybe-panel)] border-red-500/50 text-red-400 cursor-default',
+      'bg-vybe-card border-vybe-error/50 text-vybe-error cursor-default',
     disabled:
-      'bg-[var(--vybe-panel)] border-[var(--vybe-border)] text-[var(--vybe-subtle)] opacity-50 cursor-default',
+      'bg-vybe-card border-vybe-border-muted text-vybe-muted opacity-55 cursor-default',
   };
 
   return (
