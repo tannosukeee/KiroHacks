@@ -3,15 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --vybe-bg: var(--vscode-sideBar-background, #202020);
-  --vybe-panel: #242424;
-  --vybe-raised: #2a2a2a;
-  --vybe-text: var(--vscode-foreground, #f2f2f2);
-  --vybe-muted: #a8a8a8;
-  --vybe-subtle: #737373;
-  --vybe-border: rgba(255, 255, 255, 0.10);
-  --vybe-amber: #d6ad45;
-  --vybe-chip: #181818;
+  /* Cal Poly inspired */
+  --vybe-poly-green: #154734;
+  --vybe-mustang-gold: #BD8B13;
+  --vybe-stadium-gold: #F8E08E;
+  --vybe-poly-canyon: #F2C75C;
+  --vybe-farmers-green: #3A913F;
+  --vybe-dexter-green: #A4D65E;
+
+  /* Neutrals — green-tinted darks */
+  --vybe-bg: #101713;
+  --vybe-panel: #17231d;
+  --vybe-panel-2: #1d2b24;
+  --vybe-card: #171b19;
+  --vybe-card-raised: #202820;
+  --vybe-border: #345244;
+  --vybe-border-muted: #2a342f;
+  --vybe-text: #f1eadb;
+  --vybe-muted: #9d9a8f;
+
+  /* Status */
+  --vybe-success: #A4D65E;
+  --vybe-success-deep: #3A913F;
+  --vybe-warning: #F2C75C;
+  --vybe-error: #ff6b6b;
+  --vybe-error-bg: #2b2026;
+
+  /* Preserved utility */
   --vybe-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", monospace;
 }
