@@ -40,6 +40,32 @@ export const HostToWebviewMessageSchema = z.discriminatedUnion("type", [
     type: z.literal("error"),
     payload: z.object({ message: z.string() }).strict(),
   }).strict(),
+  z.object({
+    type: z.literal("quizFeedback"),
+    payload: z.object({
+      questionId: z.string(),
+      isCorrect: z.boolean(),
+      /** The correct option id — lets the UI highlight the right answer. */
+      correctOptionId: z.string(),
+      /** Explanation text from the quiz question, shown after answering. */
+      explanation: z.string(),
+      /** Concept that was tested, for display in the feedback banner. */
+      concept: z.string(),
+      /** Whether to show a hint (recovering or needsReview). */
+      showHint: z.boolean(),
+      /** Difficulty level for the next question on this concept (1–5). */
+      nextDifficulty: z.union([
+        z.literal(1),
+        z.literal(2),
+        z.literal(3),
+        z.literal(4),
+        z.literal(5),
+      ]),
+      totalXp: z.number().int().min(0),
+      level: z.number().int().min(1),
+      currentStreak: z.number().int().min(0),
+    }).strict(),
+  }).strict(),
 ]);
 
 export type HostToWebviewMessage = z.infer<typeof HostToWebviewMessageSchema>;

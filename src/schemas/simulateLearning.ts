@@ -1,5 +1,5 @@
-import { createConceptMastery } from "./mastery";
-import { updateMasteryState } from "../services/adaptiveEngine";
+import { createConceptMastery } from "./mastery.js";
+import { updateMasteryState } from "../services/adaptiveEngine.js";
 
 console.log("=== Starting Simulation ===");
 
