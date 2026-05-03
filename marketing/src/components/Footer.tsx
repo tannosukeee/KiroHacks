@@ -38,7 +38,7 @@ export default function Footer() {
           <div className="max-w-xs">
             <div className="flex items-center gap-2.5 mb-3">
               <img
-                src="/logo.png"
+                src={`${import.meta.env.BASE_URL}logo.png`}
                 alt="Vybe Tutor logo"
                 className="h-9 w-auto"
               />
@@ -83,7 +83,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-green-900/10 pt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sm text-gray-400">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="" className="h-6 w-auto opacity-40" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto opacity-40" />
             <span>&copy; 2026 Vybe Tutor — A Cal Poly student project.</span>
           </div>
           <span className="font-mono text-xs">Learn by doing.</span>
