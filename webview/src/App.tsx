@@ -1,91 +1,72 @@
-import { useEffect, useState } from "react";
-import { EmptyState } from "./components/EmptyState";
-import { HeaderBar } from "./components/HeaderBar";
-import { TutorResponseView } from "./components/TutorResponseView";
-import { useVSCodeApi } from "./hooks/useVSCodeApi";
+import React, { useState, useEffect } from 'react';
+import { HeaderBar } from './components/HeaderBar';
+import { EmptyState } from './components/EmptyState';
+import { MockExplainPreview } from './components/MockExplainPreview';
+import { useVSCodeApi } from './hooks/useVSCodeApi';
+import { GameState, createInitialGameState } from './state/gameState';
 
-interface QuizOption {
-  id: string;
-  text: string;
-}
-
-interface QuizQuestion {
-  id: string;
+interface QuizData {
   question: string;
-  options: QuizOption[];
-  correctOptionId: string;
+  choices: string[];
+  correctAnswerIndex: number;
+  hint: string;
   explanation: string;
 }
 
-export interface TutorResponse {
-  mode: "mock" | "gemini";
-  title: string;
+interface MockExplanationData {
+  concept: string;
+  lineReference: string;
   explanation: string;
-  keyConcepts: string[];
-  quiz: QuizQuestion[];
-  guardrail: {
-    blocked: boolean;
-    reason?: string;
-  };
+  codeTokens: string[];
+  language?: string;
+  fileName?: string;
+  quiz: QuizData;
 }
-
-type ViewState =
-  | { status: "empty" }
-  | { status: "loading"; response?: TutorResponse }
-  | { status: "ready"; response: TutorResponse }
-  | { status: "error"; message: string };
 
 export function App() {
   const vscodeApi = useVSCodeApi();
-  const [viewState, setViewState] = useState<ViewState>({ status: "empty" });
+  const [explanationData, setExplanationData] = useState<MockExplanationData | null>(null);
+  const [isLive, setIsLive] = useState(false);
+  const [gameState, setGameState] = useState<GameState>(createInitialGameState(''));
+  const [explanationKey, setExplanationKey] = useState(0);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const message = event.data;
+      if (message.type === 'mockExplanation') {
+        setExplanationData(message.data);
+        setIsLive(true);
+        setExplanationKey((prev) => prev + 1);
 
-      if (message.type === "loading" && message.payload.isLoading) {
-        setViewState((current) => ({
-          status: "loading",
-          response:
-            current.status === "ready" || current.status === "loading"
-              ? current.response
-              : undefined,
+        // Initialize game state concept from the explanation data
+        setGameState((prev) => ({
+          ...prev,
+          concept: message.data.concept,
         }));
-      }
-
-      if (message.type === "tutorResponse") {
-        setViewState({ status: "ready", response: message.payload });
-      }
-
-      if (message.type === "error") {
-        setViewState({ status: "error", message: message.payload.message });
       }
     };
 
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  const handleGameStateUpdate = (newState: GameState) => {
+    setGameState(newState);
+  };
+
   return (
-    <div className="min-h-screen bg-vybe-bg text-vybe-text font-mono">
-      <HeaderBar mode={viewState.status === "ready" ? "LIVE" : "IDLE"} />
+    <div className="min-h-screen bg-[var(--vybe-bg)] text-[var(--vybe-text)] font-[var(--vybe-mono)]">
+      <HeaderBar isLive={isLive} gameState={gameState} />
       <main className="p-4">
-        {viewState.status === "empty" && <EmptyState />}
-        {viewState.status === "error" && (
-          <div className="rounded border border-vybe-border bg-vybe-raised p-4 text-sm text-vybe-muted">
-            {viewState.message}
-          </div>
-        )}
-        {viewState.status === "loading" && !viewState.response && (
-          <div className="rounded border border-vybe-border bg-vybe-raised p-4 text-sm text-vybe-muted">
-            Building explanation...
-          </div>
-        )}
-        {viewState.status === "loading" && viewState.response && (
-          <TutorResponseView data={viewState.response} vscodeApi={vscodeApi} />
-        )}
-        {viewState.status === "ready" && (
-          <TutorResponseView data={viewState.response} vscodeApi={vscodeApi} />
+        {explanationData ? (
+          <MockExplainPreview
+            key={explanationKey}
+            data={explanationData}
+            gameState={gameState}
+            onGameStateUpdate={handleGameStateUpdate}
+          />
+        ) : (
+          <EmptyState />
         )}
       </main>
     </div>
