@@ -163,8 +163,6 @@ npx vitest --run
 
 ## Kiro Powers Writeup
 
-[View the full PDF](/KiroHacks/kiro-powers-writeup.pdf)
-
 ### Spec-driven development
 
 We used Kiro specs in `.kiro/specs/core-tutor-loop/` to define the full learning loop before writing code. The spec broke down requirements (Gemini integration, Zod validation, quiz flow, adaptive engine) into discrete tasks with clear acceptance criteria. This prevented scope creep during the hackathon and gave each team member a concrete implementation target.
