@@ -1,0 +1,20 @@
+{
+  "name": "vybe-tutor",
+  "version": "0.0.1",
+  "description": "Vybe Tutor – local-first AI coding tutor VS Code extension",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}
