@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { ChoiceButton } from './ChoiceButton';
 import { FeedbackBanner } from './FeedbackBanner';
+import { DifficultyIndicator } from './DifficultyIndicator';
+import { GameState, processCorrectAnswer, processWrongAnswer, getDifficultyLabel } from '../state/gameState';
+import { getNextQuestion, MockQuestion } from '../data/mockQuestions';
 
 interface QuizData {
   question: string;
@@ -22,16 +25,19 @@ interface MockExplanationData {
 
 interface MockExplainPreviewProps {
   data: MockExplanationData;
-  onXpUpdate: (xp: number) => void;
+  gameState: GameState;
+  onGameStateUpdate: (newState: GameState) => void;
 }
 
 const CHOICE_LABELS = ['A', 'B', 'C', 'D'];
 
 type ChoiceState = 'default' | 'correct' | 'incorrect' | 'disabled';
 
-export function MockExplainPreview({ data, onXpUpdate }: MockExplainPreviewProps) {
+export function MockExplainPreview({ data, gameState, onGameStateUpdate }: MockExplainPreviewProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState<QuizData>(data.quiz);
+  const [previousDifficulty, setPreviousDifficulty] = useState<number | undefined>(undefined);
 
   const handleChoiceClick = (index: number) => {
     if (isAnswered) return;
@@ -39,20 +45,74 @@ export function MockExplainPreview({ data, onXpUpdate }: MockExplainPreviewProps
     setSelectedIndex(index);
     setIsAnswered(true);
 
-    const isCorrect = index === data.quiz.correctAnswerIndex;
-    const xpAwarded = isCorrect ? 15 : 5;
-    onXpUpdate(xpAwarded);
+    const isCorrect = index === currentQuestion.correctAnswerIndex;
+
+    if (isCorrect) {
+      const newState = processCorrectAnswer(gameState);
+      setPreviousDifficulty(gameState.difficulty);
+      onGameStateUpdate(newState);
+    } else {
+      const newState = processWrongAnswer(gameState);
+      setPreviousDifficulty(gameState.difficulty);
+      onGameStateUpdate(newState);
+    }
   };
 
   const getChoiceState = (index: number): ChoiceState => {
     if (!isAnswered) return 'default';
-    if (index === data.quiz.correctAnswerIndex) return 'correct';
+    if (index === currentQuestion.correctAnswerIndex) return 'correct';
     if (index === selectedIndex) return 'incorrect';
     return 'disabled';
   };
 
-  const isCorrect = selectedIndex === data.quiz.correctAnswerIndex;
-  const xpAwarded = isCorrect ? 15 : 5;
+  const handleContinue = () => {
+    // Get next question at same or higher difficulty
+    const nextQ = getNextQuestion(
+      gameState.concept,
+      gameState.difficulty,
+      currentQuestion.question
+    );
+    if (nextQ) {
+      loadNewQuestion(nextQ);
+    }
+  };
+
+  const handleTryEasier = () => {
+    // Get question at lower difficulty, same concept
+    const nextQ = getNextQuestion(
+      gameState.concept,
+      gameState.difficulty,
+      currentQuestion.question
+    );
+    if (nextQ) {
+      loadNewQuestion(nextQ);
+    }
+  };
+
+  const loadNewQuestion = (q: MockQuestion) => {
+    setCurrentQuestion({
+      question: q.question,
+      choices: q.choices,
+      correctAnswerIndex: q.correctAnswerIndex,
+      hint: q.hint,
+      explanation: q.explanation,
+    });
+    setSelectedIndex(null);
+    setIsAnswered(false);
+    setPreviousDifficulty(undefined);
+  };
+
+  const isCorrect = selectedIndex === currentQuestion.correctAnswerIndex;
+  const xpAwarded = isAnswered
+    ? isCorrect
+      ? gameState.isRecovering ? 15 : 10
+      : 5
+    : 0;
+
+  // Build difficulty change string for wrong answers
+  const difficultyChangeStr = isAnswered && !isCorrect && previousDifficulty !== undefined
+    ? `${getDifficultyLabel(previousDifficulty)} → ${getDifficultyLabel(gameState.difficulty)}`
+    : undefined;
 
   return (
     <div className="space-y-4">
@@ -83,17 +143,23 @@ export function MockExplainPreview({ data, onXpUpdate }: MockExplainPreviewProps
 
       {/* Quick check section */}
       <div className="space-y-3">
-        <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[var(--vybe-subtle)]">
-          QUICK CHECK · +10 XP
+        <div className="flex items-center justify-between">
+          <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[var(--vybe-subtle)]">
+            QUICK CHECK · +10 XP
+          </div>
+          <DifficultyIndicator
+            difficulty={gameState.difficulty}
+            previousDifficulty={previousDifficulty}
+          />
         </div>
 
         <p className="text-sm text-[var(--vybe-text)] leading-relaxed">
-          {data.quiz.question}
+          {currentQuestion.question}
         </p>
 
         {/* Answer choices */}
         <div className="space-y-2">
-          {data.quiz.choices.map((choice, index) => (
+          {currentQuestion.choices.map((choice, index) => (
             <ChoiceButton
               key={index}
               label={CHOICE_LABELS[index] || String(index + 1)}
@@ -108,9 +174,14 @@ export function MockExplainPreview({ data, onXpUpdate }: MockExplainPreviewProps
         {isAnswered && (
           <FeedbackBanner
             isCorrect={isCorrect}
-            hint={data.quiz.hint}
+            hint={currentQuestion.hint}
             xpAwarded={xpAwarded}
-            quizExplanation={isCorrect ? data.quiz.explanation : undefined}
+            combo={gameState.combo}
+            isRecovering={!isCorrect ? true : undefined}
+            difficultyChange={difficultyChangeStr}
+            quizExplanation={currentQuestion.explanation}
+            onContinue={isCorrect ? handleContinue : undefined}
+            onTryEasier={!isCorrect ? handleTryEasier : undefined}
           />
         )}
       </div>

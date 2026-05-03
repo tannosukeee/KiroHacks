@@ -3,6 +3,7 @@ import { HeaderBar } from './components/HeaderBar';
 import { EmptyState } from './components/EmptyState';
 import { MockExplainPreview } from './components/MockExplainPreview';
 import { useVSCodeApi } from './hooks/useVSCodeApi';
+import { GameState, createInitialGameState } from './state/gameState';
 
 interface QuizData {
   question: string;
@@ -26,7 +27,7 @@ export function App() {
   const vscodeApi = useVSCodeApi();
   const [explanationData, setExplanationData] = useState<MockExplanationData | null>(null);
   const [isLive, setIsLive] = useState(false);
-  const [totalXp, setTotalXp] = useState(0);
+  const [gameState, setGameState] = useState<GameState>(createInitialGameState(''));
   const [explanationKey, setExplanationKey] = useState(0);
 
   useEffect(() => {
@@ -36,6 +37,12 @@ export function App() {
         setExplanationData(message.data);
         setIsLive(true);
         setExplanationKey((prev) => prev + 1);
+
+        // Initialize game state concept from the explanation data
+        setGameState((prev) => ({
+          ...prev,
+          concept: message.data.concept,
+        }));
       }
     };
 
@@ -43,19 +50,20 @@ export function App() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const handleXpUpdate = (xp: number) => {
-    setTotalXp((prev) => prev + xp);
+  const handleGameStateUpdate = (newState: GameState) => {
+    setGameState(newState);
   };
 
   return (
     <div className="min-h-screen bg-[var(--vybe-bg)] text-[var(--vybe-text)] font-[var(--vybe-mono)]">
-      <HeaderBar isLive={isLive} totalXp={totalXp} />
+      <HeaderBar isLive={isLive} gameState={gameState} />
       <main className="p-4">
         {explanationData ? (
           <MockExplainPreview
             key={explanationKey}
             data={explanationData}
-            onXpUpdate={handleXpUpdate}
+            gameState={gameState}
+            onGameStateUpdate={handleGameStateUpdate}
           />
         ) : (
           <EmptyState />
