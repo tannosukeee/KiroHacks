@@ -31,10 +31,11 @@ ENV/
 Thumbs.db
 desktop.ini
 
-# Node
+# Node / TypeScript
 node_modules/
 dist/
 *.tsbuildinfo
+*.vsix
 
 # Project specific
 *.db
