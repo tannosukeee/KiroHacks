@@ -16,6 +16,6 @@
 
     "types": ["node", "vscode"]
   },
-  "include": ["src"],
+  "include": ["src", "tests/testPerson3.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -5,6 +5,7 @@ import {
 } from "../shared/contracts";
 import { buildTutorPrompt } from "./prompts";
 import { mockTutorResponse } from "./mockTutorResponse";
+import { enrichWithDocs } from "../services/docEnricher";
 
 const GEMINI_API_KEY_SECRET = "vybeTutor.apiKey";
 
@@ -44,11 +45,26 @@ export async function getTutorResponse(params: {
     };
   }
 
-  return getGeminiTutorResponse({
+  const response = await getGeminiTutorResponse({
     apiKey,
     selectedCode: params.selectedCode,
     languageId: params.languageId,
   });
+
+  // Enrich with official doc references (non-blocking — if it fails, skip)
+  try {
+    const docRefs = await enrichWithDocs(
+      response.keyConcepts,
+      params.languageId
+    );
+    if (docRefs.length > 0) {
+      response.docReferences = docRefs;
+    }
+  } catch {
+    // Doc enrichment is best-effort, don't break the tutor flow
+  }
+
+  return response;
 }
 
 async function getGeminiTutorResponse(params: {

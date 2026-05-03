@@ -6,6 +6,14 @@ export const mockTutorResponse = TutorResponseSchema.parse({
   explanation:
     "This code introduces a basic programming idea and explains how the pieces work together.",
   keyConcepts: ["variables", "functions"],
+  docReferences: [
+    {
+      concept: "functions",
+      quote: "The keyword def introduces a function definition. It must be followed by the function name and the parenthesized list of formal parameters.",
+      source: "Official Python Documentation",
+      url: "https://docs.python.org/3/tutorial/controlflow.html#defining-functions",
+    },
+  ],
   quiz: [
     {
       id: "q1",

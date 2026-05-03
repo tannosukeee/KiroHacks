@@ -13,11 +13,19 @@ export const QuizQuestionSchema = z.object({
   explanation: z.string(),
 }).strict();
 
+export const DocReferenceSchema = z.object({
+  concept: z.string(),
+  quote: z.string(),
+  source: z.string(),
+  url: z.string(),
+}).strict();
+
 export const TutorResponseSchema = z.object({
   mode: z.enum(["mock", "gemini"]),
   title: z.string(),
   explanation: z.string(),
   keyConcepts: z.array(z.string()),
+  docReferences: z.array(DocReferenceSchema).optional().default([]),
   quiz: z.array(QuizQuestionSchema).min(1),
   guardrail: z.object({
     blocked: z.boolean(),
@@ -26,6 +34,7 @@ export const TutorResponseSchema = z.object({
 }).strict();
 
 export type TutorResponse = z.infer<typeof TutorResponseSchema>;
+export type DocReference = z.infer<typeof DocReferenceSchema>;
 
 export const HostToWebviewMessageSchema = z.discriminatedUnion("type", [
   z.object({
