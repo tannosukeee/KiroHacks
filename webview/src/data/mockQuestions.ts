@@ -229,27 +229,40 @@ export function getQuestionByConcept(concept: string): MockQuestion[] {
   return mockQuestions.filter((q) => q.concept === concept);
 }
 
+function normalizeConcept(concept: string): string {
+  const lower = concept.toLowerCase();
+  if (lower.includes('async') || lower.includes('await') || lower.includes('promise')) {
+    return 'async/await';
+  }
+  if (lower.includes('cache') || lower.includes('memo')) {
+    return 'caching/memoization';
+  }
+  return 'code structure';
+}
+
 export function getNextQuestion(
   concept: string,
   difficulty: number,
   excludeQuestion?: string
 ): MockQuestion | null {
+  const normalizedConcept = normalizeConcept(concept);
+
   // Try to find a question at the requested difficulty
   let candidates = mockQuestions.filter(
-    (q) => q.concept === concept && q.difficulty === difficulty && q.question !== excludeQuestion
+    (q) => q.concept === normalizedConcept && q.difficulty === difficulty && q.question !== excludeQuestion
   );
 
   // If no questions at exact difficulty, try adjacent difficulties
   if (candidates.length === 0) {
     candidates = mockQuestions.filter(
-      (q) => q.concept === concept && Math.abs(q.difficulty - difficulty) <= 1 && q.question !== excludeQuestion
+      (q) => q.concept === normalizedConcept && Math.abs(q.difficulty - difficulty) <= 1 && q.question !== excludeQuestion
     );
   }
 
   // If still nothing, get any question from the concept
   if (candidates.length === 0) {
     candidates = mockQuestions.filter(
-      (q) => q.concept === concept && q.question !== excludeQuestion
+      (q) => q.concept === normalizedConcept && q.question !== excludeQuestion
     );
   }
 

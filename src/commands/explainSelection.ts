@@ -64,7 +64,7 @@ function buildMockTutorResponse(
 ): MockTutorResponse {
   const mocksByLanguage: Record<string, MockTutorResponse> = {
     python: {
-      concept: '@cache decorator',
+      concept: 'caching/memoization',
       lineReference: `Line ${startLine} · ${fileName}`,
       explanation:
         'The @cache decorator from functools stores the results of expensive function calls. When the same arguments are passed again, it returns the cached result instead of recomputing.',
@@ -86,7 +86,7 @@ function buildMockTutorResponse(
       },
     },
     typescript: {
-      concept: 'async/await pattern',
+      concept: 'async/await',
       lineReference: `Line ${startLine} · ${fileName}`,
       explanation:
         'The async/await pattern lets you write asynchronous code that reads like synchronous code. An async function always returns a Promise, and await pauses execution until that Promise resolves.',
@@ -108,7 +108,7 @@ function buildMockTutorResponse(
       },
     },
     javascript: {
-      concept: 'array destructuring',
+      concept: 'code structure',
       lineReference: `Line ${startLine} · ${fileName}`,
       explanation:
         'Array destructuring lets you unpack values from arrays into distinct variables. The syntax uses square brackets on the left side of an assignment.',
