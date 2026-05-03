@@ -45,3 +45,4 @@ dist/
 *.log
 output/cache/
 uploads/temp/
+node_modules/
