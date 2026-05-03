@@ -205,7 +205,7 @@ We use 4 hooks in `.kiro/hooks/` to automate quality and consistency:
 
 ## Demo
 
-[Link to YouTube/Vimeo demo video - 3 minutes]
+[[Link to YouTube/Vimeo demo video - 3 minutes]](https://drive.google.com/file/d/1ULOTPL4I1GCHzBw3qd7yint6ztMYo9kz/view?usp=sharing)
 
 ## Team
 
