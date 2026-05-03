@@ -3,6 +3,8 @@ import { EmptyState } from "./components/EmptyState";
 import { HeaderBar } from "./components/HeaderBar";
 import { TutorResponseView } from "./components/TutorResponseView";
 import { useVSCodeApi } from "./hooks/useVSCodeApi";
+import { createInitialGameState } from "./state/gameState";
+import type { GameState } from "./state/gameState";
 
 interface QuizOption {
   id: string;
@@ -52,6 +54,7 @@ type ViewState =
 export function App() {
   const vscodeApi = useVSCodeApi();
   const [viewState, setViewState] = useState<ViewState>({ status: "empty" });
+  const [gameState, setGameState] = useState<GameState>(createInitialGameState(""));
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -77,6 +80,17 @@ export function App() {
 
       if (message.type === "quizFeedback") {
         console.log("[Vybe Tutor] quizFeedback received:", message.payload);
+        // Update gameState so HeaderBar shows current XP/level/streak.
+        setGameState((prev) => ({
+          ...prev,
+          totalXp: message.payload.totalXp,
+          level: message.payload.level,
+          xpInLevel: message.payload.totalXp % 100,
+          streak: message.payload.currentStreak,
+          isRecovering: message.payload.showHint,
+          difficulty: message.payload.nextDifficulty,
+          concept: message.payload.concept,
+        }));
         setViewState((current) => {
           // Keep the current response so the quiz stays visible alongside feedback.
           const response =
@@ -99,7 +113,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-vybe-bg text-vybe-text font-mono">
-      <HeaderBar mode={viewState.status === "ready" ? "LIVE" : "IDLE"} />
+      <HeaderBar isLive={viewState.status === "ready" || viewState.status === "feedback"} gameState={gameState} />
       <main className="p-4">
         {viewState.status === "empty" && <EmptyState />}
         {viewState.status === "error" && (
