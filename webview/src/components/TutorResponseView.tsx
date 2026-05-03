@@ -50,15 +50,16 @@ export function TutorResponseView({ data, vscodeApi }: TutorResponseViewProps) {
                 key={option.id}
                 className="w-full rounded border border-vybe-border bg-vybe-raised px-3 py-2 text-left text-sm text-vybe-text transition hover:border-vybe-amber focus:outline-none focus:ring-2 focus:ring-vybe-amber"
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  console.log("Clicked option", option.id);
                   vscodeApi.postMessage({
                     type: "submitQuizAnswer",
                     payload: {
                       questionId: firstQuiz.id,
                       selectedOptionId: option.id,
                     },
-                  })
-                }
+                  });
+                }}
               >
                 <span className="mr-2 text-vybe-amber">
                   {option.id.toUpperCase()}.

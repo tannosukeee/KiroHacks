@@ -29,10 +29,24 @@ export interface TutorResponse {
   };
 }
 
+export interface QuizFeedback {
+  questionId: string;
+  isCorrect: boolean;
+  correctOptionId: string;
+  explanation: string;
+  concept: string;
+  showHint: boolean;
+  nextDifficulty: 1 | 2 | 3 | 4 | 5;
+  totalXp: number;
+  level: number;
+  currentStreak: number;
+}
+
 type ViewState =
   | { status: "empty" }
   | { status: "loading"; response?: TutorResponse }
   | { status: "ready"; response: TutorResponse }
+  | { status: "feedback"; feedback: QuizFeedback; response: TutorResponse }
   | { status: "error"; message: string };
 
 export function App() {
@@ -60,6 +74,23 @@ export function App() {
       if (message.type === "error") {
         setViewState({ status: "error", message: message.payload.message });
       }
+
+      if (message.type === "quizFeedback") {
+        console.log("[Vybe Tutor] quizFeedback received:", message.payload);
+        setViewState((current) => {
+          // Keep the current response so the quiz stays visible alongside feedback.
+          const response =
+            current.status === "ready" ||
+            current.status === "feedback" ||
+            current.status === "loading"
+              ? current.response
+              : undefined;
+          if (!response) {
+            return current;
+          }
+          return { status: "feedback", feedback: message.payload, response };
+        });
+      }
     };
 
     window.addEventListener("message", handleMessage);
@@ -86,6 +117,26 @@ export function App() {
         )}
         {viewState.status === "ready" && (
           <TutorResponseView data={viewState.response} vscodeApi={vscodeApi} />
+        )}
+        {viewState.status === "feedback" && (
+          <>
+            <TutorResponseView data={viewState.response} vscodeApi={vscodeApi} />
+            <div className="mt-4 rounded border border-vybe-border bg-vybe-raised p-3 text-sm">
+              <p className="font-semibold text-vybe-amber">
+                {viewState.feedback.isCorrect ? "✓ Correct" : "✗ Incorrect"}
+              </p>
+              <p className="mt-1 text-vybe-text">{viewState.feedback.explanation}</p>
+              {viewState.feedback.showHint && (
+                <p className="mt-1 text-vybe-muted">
+                  Hint: try a slightly easier question on{" "}
+                  <span className="text-vybe-amber">{viewState.feedback.concept}</span>.
+                </p>
+              )}
+              <p className="mt-2 text-vybe-muted text-xs">
+                XP: {viewState.feedback.totalXp} · Level: {viewState.feedback.level} · Streak: {viewState.feedback.currentStreak}
+              </p>
+            </div>
+          </>
         )}
       </main>
     </div>
