@@ -25,6 +25,10 @@
       {
         "command": "vybeTutor.explainSelection",
         "title": "Vybe Tutor: Explain Selection"
+      },
+      {
+        "command": "vybeTutor.showMoreFromInline",
+        "title": "Vybe Tutor: Show More from Inline"
       }
     ],
     "viewsContainers": {
