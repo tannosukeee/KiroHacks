@@ -5,20 +5,24 @@ inclusion: always
 # MVP Scope
 
 ## Goal
-Deliver one tight, judge-friendly learning loop that is reliable in a live demo:
+
+Deliver one visually polished, judge-friendly learning loop that matches the mockups and works reliably in a live demo:
 
 ```text
-code context -> explanation -> quiz -> feedback -> adaptive difficulty -> XP/streak -> local persistence
+code context -> VYBE EXPLAIN -> quick check -> feedback -> adaptive difficulty -> XP/streak -> local persistence
 ```
 
-If a feature does not improve this loop, it is a stretch feature.
+If a feature does not improve this loop or the mockup-aligned demo, it is a stretch feature.
 
 ## Must-have functionality
+
 - VS Code command to start tutoring on selected code.
 - Sidebar/webview view for the tutoring experience.
+- Mockup-aligned `VYBE EXPLAIN` panel.
 - Gemini-generated code explanation.
 - Concept identification.
-- One comprehension quiz question tied to the same concept.
+- Inline code-chip rendering for important tokens.
+- One quick-check quiz question tied to the same concept.
 - Answer submission flow.
 - Hint or easier retry after an incorrect answer.
 - Deterministic local difficulty adjustment.
@@ -28,23 +32,35 @@ If a feature does not improve this loop, it is a stretch feature.
 - Pause/snooze control or simple disable toggle.
 - Friendly retry state for Gemini/API failure.
 
+## Design-must-have for demo
+
+- Dark terminal-inspired UI.
+- Amber accent color.
+- Header with `VYBE EXPLAIN` and `LIVE` pill.
+- Large readable monospace explanation copy.
+- `QUICK CHECK · +10 XP` section.
+- Full-width answer choice buttons.
+- Calm feedback after answer submission.
+
 ## PRD must-haves mapped to hackathon MVP
+
 - Extension Install CTA: repo/README and demo install path are enough for the hackathon; Marketplace publishing is not a hard blocker.
 - Real-Time Code Explanation: selected-code command is the safe MVP path; on-save is stretch unless the core loop is stable.
 - Comprehension Quiz/Check: implement one question per explanation first.
 - Gamification: implement XP, level, and streak locally.
 
 ## Should-have functionality
-- Visual difficulty indicator.
+
+- Quick calibration/onboarding screen matching the second mockup.
+- Visual difficulty/calibration label, such as `Calibrated for: Advanced`.
 - Concept badge.
 - Short feedback after each answer.
 - One or two polished demo snippets.
 - Support for Python plus one additional language if time allows.
-- Simple explanation-depth preference or default beginner mode.
-- Simple deep-dive follow-up input in the sidebar if the main loop is stable.
 
 ## Stretch features
-- Explanation depth onboarding quiz.
+
+- Full 3-5 question onboarding calibration with persistence.
 - Syllabus or lecture note import.
 - PDF, DOCX, and TXT parsing.
 - Course-topic matching and `Relate to my coursework` button.
@@ -55,6 +71,7 @@ If a feature does not improve this loop, it is a stretch feature.
 - Export of local progress history.
 
 ## Explicitly out of scope
+
 - Supabase or cloud sync.
 - Account management.
 - Canvas LMS OAuth.
@@ -64,15 +81,17 @@ If a feature does not improve this loop, it is a stretch feature.
 - Support for JetBrains, Cursor, or other IDEs.
 
 ## Build order
+
 1. Open sidebar view.
-2. Extract selected editor context.
-3. Call Gemini for explanation and quiz.
-4. Validate response with Zod.
-5. Render explanation and quiz.
-6. Submit answer and show feedback.
-7. Update adaptive mastery state.
-8. Update XP, level, and streak.
-9. Persist local state.
-10. Add pause/snooze.
-11. Polish UI and demo snippets.
-12. Add on-save, deep-dive, onboarding, import, and other stretch features only after the loop is stable.
+2. Render mockup-aligned static `VYBE EXPLAIN` UI using mock data.
+3. Extract selected editor context.
+4. Call Gemini for explanation and quiz.
+5. Validate response with Zod.
+6. Render explanation and quiz from real data.
+7. Submit answer and show feedback.
+8. Update adaptive mastery state.
+9. Update XP, level, and streak.
+10. Persist local state.
+11. Add pause/snooze.
+12. Add calibration/onboarding screen if time allows.
+13. Add on-save, import, deep-dive, and other stretch features only after the loop is stable.

@@ -14,6 +14,12 @@ Vybe Tutor is a local-first VS Code extension with a TypeScript extension host a
 │   ├── specs/
 │   ├── steering/
 │   └── hooks/
+├── docs/
+│   └── design/
+│       ├── mockup-notes.md
+│       └── mockups/
+│           ├── vybe-explain-panel.png
+│           └── vybe-calibration-screen.png
 ├── src/
 │   ├── extension.ts
 │   ├── commands/
@@ -30,20 +36,19 @@ Vybe Tutor is a local-first VS Code extension with a TypeScript extension host a
 │   │   ├── context.ts
 │   │   ├── adaptiveEngine.ts
 │   │   ├── gamification.ts
+│   │   ├── onboarding.ts
 │   │   ├── materials.ts
-│   │   ├── deepDive.ts
 │   │   └── storage.ts
 │   ├── schemas/
 │   │   ├── tutorResponse.ts
 │   │   ├── messages.ts
 │   │   ├── mastery.ts
 │   │   ├── gamification.ts
-│   │   └── materials.ts
+│   │   └── onboarding.ts
 │   ├── prompts/
 │   │   ├── explainAndQuiz.ts
 │   │   ├── nextQuestion.ts
-│   │   ├── answerFeedback.ts
-│   │   └── deepDive.ts
+│   │   └── answerFeedback.ts
 │   ├── types/
 │   ├── utils/
 │   │   ├── guardrails.ts
@@ -56,6 +61,23 @@ Vybe Tutor is a local-first VS Code extension with a TypeScript extension host a
 │   │   ├── main.tsx
 │   │   ├── App.tsx
 │   │   ├── components/
+│   │   │   ├── HeaderBar.tsx
+│   │   │   ├── LiveStatusBadge.tsx
+│   │   │   ├── ExplanationCard.tsx
+│   │   │   ├── InlineCodeChip.tsx
+│   │   │   ├── QuickCheckCard.tsx
+│   │   │   ├── QuizVisualCard.tsx
+│   │   │   ├── ChoiceButton.tsx
+│   │   │   ├── FeedbackBanner.tsx
+│   │   │   ├── DifficultyIndicator.tsx
+│   │   │   ├── CalibrationScreen.tsx
+│   │   │   ├── CalibrationOption.tsx
+│   │   │   ├── ProgressRail.tsx
+│   │   │   ├── BottomStepPill.tsx
+│   │   │   ├── EmptyState.tsx
+│   │   │   ├── LoadingState.tsx
+│   │   │   ├── ErrorState.tsx
+│   │   │   └── PausedState.tsx
 │   │   ├── hooks/
 │   │   ├── state/
 │   │   └── styles/
@@ -72,6 +94,7 @@ Vybe Tutor is a local-first VS Code extension with a TypeScript extension host a
 ```
 
 ## Placement rules
+
 - Commands belong in `src/commands/`.
 - Extension activation and command registration belong in `src/extension.ts`.
 - A true sidebar should use `WebviewViewProvider`; keep it in `src/views/TutorViewProvider.ts`.
@@ -79,12 +102,12 @@ Vybe Tutor is a local-first VS Code extension with a TypeScript extension host a
 - Tutor orchestration belongs in `src/services/tutor.ts`.
 - Adaptive difficulty belongs in `src/services/adaptiveEngine.ts`.
 - XP, levels, and streaks belong in `src/services/gamification.ts`.
-- File/course-material import logic belongs in `src/services/materials.ts`.
-- Deep-dive follow-up orchestration belongs in `src/services/deepDive.ts` or a clearly separated path in `tutor.ts`.
+- Calibration state belongs in `src/services/onboarding.ts` and `src/schemas/onboarding.ts`.
 - Prompt text belongs in `src/prompts/`.
 - Zod schemas belong in `src/schemas/`.
+- Mockup and design documentation belongs in `docs/design/`.
 - React sidebar components belong in `webview/src/components/`.
-- Demo snippets belong in `src/test-data/snippets/`.
 
 ## Naming rule
+
 Use `TutorViewProvider` for the VS Code sidebar implementation. Use `TutorPanel` only if the team intentionally chooses a floating `WebviewPanel` instead of the PRD sidebar.

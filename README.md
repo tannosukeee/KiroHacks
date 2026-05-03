@@ -1,6 +1,6 @@
-# [PROJECT NAME]
+# Vybe Tutor
 
-> [One-line tagline]
+> A IDE extension to help students learn from vibe coding rather than exploit it. 
 
 ## What it does
 
@@ -8,7 +8,7 @@
 
 ## The problem we're solving
 
-[Concrete description of the social problem, ideally with statistics]
+Vibe coding has been a great tool for students, faculty, and companies alike. Yet, it can become a double-edged sword, especially for students. For example, students can blindly paste code without understanding what the code is doing or security concerns that come with the code. We aim to build an extension to provide real-time and inline for students when vibe coding. 
 
 ## How we built it
 
@@ -28,26 +28,27 @@ Developed entirely in Kiro IDE with spec-driven development, agent hooks, and cu
 ## Tech stack
 
 - **Language**: Python 3.11+
-- **Backend**: FastAPI, SQLAlchemy 2.0 (async), SQLite
-- **Frontend**: Streamlit
-- **AI**: Anthropic Claude API (Claude Sonnet 4)
+- **Backend**: FastAPI, SQLite
+- **Frontend**: React
+- **AI**: Google Gemini 2.5 Flash 
 - **IDE**: Kiro
 
 ## Setup and run
 
 ### Prerequisites
 - Python 3.11 or higher
-- Anthropic API key (from console.anthropic.com)
+- Google Gemini (from Google AI Studio)
 
 ### Installation
 ```bash
-git clone https://github.com/[USERNAME]/[REPO-NAME].git
-cd [REPO-NAME]
+git clone https://github.com/tannosukeee/KiroHacks.git
+cd KiroHacks
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+brew install python        # (Optional) Install Python via Homebrew
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+# Edit .env and add your GOOGLE_GEMINI_API_KEY
 ```
 
 ### Running
@@ -70,12 +71,20 @@ Frontend at http://localhost:8501, API docs at http://localhost:8000/docs
 - How spec-driven approach prevented scope creep
 - Comparison with vibe coding for specific features]
 
-### Agent hooks
+### Agent Hooks
 
-[Describe hooks in .kiro/hooks/. Examples:
-- Hook for auto-running tests on save
-- Hook for syncing spec changes with implementation
-- Time saved and bugs prevented]
+We use hooks in `.kiro/hooks/` to automate repetitive tasks and maintain consistency across the system.
+**Examples:**
+- **Auto-run tests on save**  
+  Runs tests when relevant files change, helping catch errors early and reducing manual checks.
+- **Spec to implementation sync**  
+  Ensures updates to contracts (e.g., Zod schemas and message types) are reflected across the codebase, preventing mismatches between AI output and UI.
+- **Mock to real mode switching**  
+  Enables seamless fallback between mock responses and live Gemini calls for faster development and safer demos.
+**Impact:**
+- Saves time by reducing manual steps  
+- Prevents bugs caused by stale types or broken contracts  
+- Keeps the AI pipeline consistent and predictable
 
 ### Steering documents
 
