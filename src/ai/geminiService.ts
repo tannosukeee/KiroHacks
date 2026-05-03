@@ -6,7 +6,7 @@ import {
 import { buildTutorPrompt } from "./prompts";
 import { mockTutorResponse } from "./mockTutorResponse";
 
-const GEMINI_API_KEY_SECRET = "gemini.apiKey";
+const GEMINI_API_KEY_SECRET = "vybeTutor.apiKey";
 
 export async function storeGeminiApiKey(
   context: vscode.ExtensionContext,

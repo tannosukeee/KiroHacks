@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --vybe-bg: var(--vscode-sideBar-background, #202020);
+  --vybe-panel: #242424;
+  --vybe-raised: #2a2a2a;
+  --vybe-text: var(--vscode-foreground, #f2f2f2);
+  --vybe-muted: #a8a8a8;
+  --vybe-subtle: #737373;
+  --vybe-border: rgba(255, 255, 255, 0.10);
+  --vybe-amber: #d6ad45;
+  --vybe-chip: #181818;
+  --vybe-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--vybe-bg);
+  color: var(--vybe-text);
+  font-family: var(--vybe-mono);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -46,6 +46,9 @@ export type HostToWebviewMessage = z.infer<typeof HostToWebviewMessageSchema>;
 
 export const WebviewToHostMessageSchema = z.discriminatedUnion("type", [
   z.object({
+    type: z.literal("ready"),
+  }),
+  z.object({
     type: z.literal("requestTutorResponse"),
     payload: z.object({
       selectedCode: z.string(),
