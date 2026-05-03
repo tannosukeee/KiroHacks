@@ -1,4 +1,4 @@
-import { getTutorResponse } from "./ai/geminiService";
+import { getTutorResponse } from "../src/ai/geminiService";
 
 async function run() {
   const res = await getTutorResponse({

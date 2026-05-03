@@ -25,6 +25,10 @@
       {
         "command": "vybeTutor.explainSelection",
         "title": "Vybe Tutor: Explain Selection"
+      },
+      {
+        "command": "vybeTutor.showMoreFromInline",
+        "title": "Vybe Tutor: Show More from Inline"
       }
     ],
     "viewsContainers": {
@@ -48,7 +52,7 @@
   },
   "scripts": {
     "compile": "tsc -p tsconfig.json",
-    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "build": "npx esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "build:webview": "cd webview && npx vite build",
     "watch": "tsc -watch -p tsconfig.json",
     "test": "tsc -p tsconfig.json --noEmit",
@@ -72,9 +76,9 @@
     "zod": "^4.4.2"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
-    "@types/node": "^25.6.0",
     "@types/vscode": "^1.118.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
