@@ -4,7 +4,15 @@
 
 ## What it does
 
-Vybe Tutor is a local-first VS Code extension that turns passive vibe coding into active learning. When students accept AI-generated code, Vybe Tutor explains what the code does, identifies key concepts, quizzes them on comprehension, and links to official documentation — all without leaving the editor. It adapts to the student's skill level and rewards learning through XP, levels, and streaks.
+Vybe Tutor is a local-first VS Code extension that turns passive vibe coding into active learning. When students accept AI-generated code, Vybe Tutor explains what the code does, identifies key concepts, quizzes them on comprehension, and links to official documentation — all without leaving the editor. It adapts to the student's skill level in real time and rewards learning through XP, levels, and daily streaks.
+
+The full loop runs entirely in the IDE sidebar:
+
+1. Student selects AI-generated code
+2. Gemini generates a plain-language explanation and a comprehension quiz
+3. Student answers the quiz — the extension grades it locally, no round-trip to AI
+4. Adaptive engine adjusts difficulty based on the answer (correct → harder, wrong → easier + hint)
+5. XP, level, and streak update immediately in the header bar
 
 ## The problem we're solving
 
@@ -13,6 +21,8 @@ Vibe coding has been a great tool for students, faculty, and companies alike. Ye
 ## How we built it
 
 Built as a VS Code extension with TypeScript, React, and the Gemini API. Developed entirely in Kiro IDE using spec-driven development, 18 steering documents, agent hooks for automated validation, and custom MCP integrations for documentation enrichment.
+
+The adaptive engine and gamification layer are pure deterministic TypeScript functions — no AI involved in state transitions. Difficulty, XP, levels, and streaks are all computed locally from Zod-validated state, making the learning loop fast, testable, and privacy-safe.
 
 ## Track alignment
 
@@ -31,17 +41,18 @@ Students across all skill levels increasingly rely on AI to write code, creating
 - **UI**: React sidebar webview with Tailwind CSS
 - **Bundling**: esbuild (extension), Vite (webview)
 - **AI**: Google Gemini 2.5 Flash
-- **Validation**: Zod schemas for all AI outputs and messages
-- **Storage**: VS Code SecretStorage (API keys), globalState (progress/XP)
+- **Validation**: Zod schemas for all AI outputs, messages, and local state
+- **Adaptive engine**: Deterministic pure functions — no AI in state transitions
+- **Storage**: VS Code SecretStorage (API keys), in-memory state (session progress)
+- **Testing**: Vitest — 49 unit tests covering all difficulty transitions and gamification logic
 - **MCP**: Custom Python Docs server for documentation enrichment
 - **IDE**: Kiro
-
 
 ## Project structure
 
 ```
 src/
-  extension.ts              Extension entry point and command registration
+  extension.ts              Extension entry point, command registration, answer submission bridge
   ai/
     geminiService.ts         Gemini API integration with SecretStorage key management
     prompts.ts               Structured prompt builder for explanations and quizzes
@@ -52,26 +63,64 @@ src/
   views/
     TutorViewProvider.ts     WebviewViewProvider for the sidebar UI
   services/
+    adaptiveEngine.ts        Deterministic difficulty adjustment — gradeMultipleChoiceAnswer,
+                             updateMasteryState, chooseNextDifficulty, shouldShowHint
+    gamification.ts          XP, levels, and streak tracking — awardQuizXp, calculateLevel,
+                             updateDailyStreak
     docEnricher.ts           Maps concepts to Python docs and fetches relevant quotes
-    adaptiveEngine.ts        Deterministic difficulty adjustment based on performance
-    gamification.ts          XP, levels, and streak tracking
   schemas/
-    gamification.ts          Zod schemas for XP and level state
-    mastery.ts               Zod schemas for concept mastery tracking
+    mastery.ts               Zod schemas and types for concept mastery state
+    gamification.ts          Zod schemas and types for XP, level, and streak state
   shared/
-    contracts.ts             Zod schemas for TutorResponse, DocReference, and messages
+    contracts.ts             Zod schemas for TutorResponse, host/webview messages,
+                             and quizFeedback payload
   mcp/
     pythonDocsServer.ts      MCP server exposing Python documentation tools
-    pythonDocsTool.ts         Fetches and parses official Python docs by topic
+    pythonDocsTool.ts        Fetches and parses official Python docs by topic
     tutorMcpServer.ts        MCP server for tutor capabilities
 webview/
-  src/                       React sidebar UI with Tailwind CSS
+  src/
+    App.tsx                  Main React app — view state machine, message handler
+    components/
+      TutorResponseView.tsx  Explanation, quiz, and answer buttons
+      HeaderBar.tsx          XP progress bar, streak, live/idle badge
+      EmptyState.tsx         Initial state prompt
+    state/
+      gameState.ts           Client-side game state model
+    hooks/
+      useVSCodeApi.ts        VS Code webview API hook
   vite.config.ts             Vite bundler config for webview
+tests/
+  unit/
+    adaptiveEngine.test.ts   27 tests — difficulty transitions, recovery loop, hint logic
+    gamification.test.ts     22 tests — XP, levels, streaks, idempotency, date guards
 .kiro/
   specs/                     Spec-driven feature definitions
   steering/                  18 steering documents for conventions and scope
   hooks/                     Agent hooks for automated validation
 ```
+
+## Core learning loop
+
+```
+Select code → Gemini explanation → Concept identification → Doc enrichment
+    → Comprehension quiz → Local grading → Adaptive difficulty → XP/streak → quizFeedback
+```
+
+## Answer submission bridge
+
+When a student clicks a quiz answer:
+
+1. **Webview** sends `submitQuizAnswer` with `questionId` and `selectedOptionId`
+2. **Extension host** looks up the correct answer from the last `TutorResponse`
+3. **`gradeMultipleChoiceAnswer`** compares selected vs correct (case-insensitive)
+4. **`updateMasteryState`** adjusts difficulty and recovery state
+5. **`awardQuizXp`** adds XP (+5 attempt, +10 correct, +5 recovery bonus)
+6. **`updateDailyStreak`** updates the calendar streak
+7. **Extension host** posts `quizFeedback` back with `isCorrect`, `correctOptionId`, `explanation`, `showHint`, `nextDifficulty`, `totalXp`, `level`, `currentStreak`
+8. **Webview** renders the feedback banner and updates the header bar
+
+All state transitions are deterministic and locally computed — Gemini is only called for explanations and quiz generation, never for grading or difficulty decisions.
 
 ## Setup and run
 
@@ -96,6 +145,9 @@ npm run build
 # Build the webview
 npm run build:webview
 
+# Run unit tests
+npx vitest --run
+
 # Or open in VS Code and press F5 to launch the Extension Development Host
 ```
 
@@ -108,13 +160,6 @@ npm run build:webview
 1. Select code in the editor
 2. Run `Vybe Tutor: Explain Selection` from the command palette
 3. The sidebar shows: explanation → doc references → quiz → feedback → XP update
-
-## Core learning loop
-
-```
-Select code → Gemini explanation → Concept identification → Doc enrichment
-    → Comprehension quiz → Answer feedback → Adaptive difficulty → XP/streak
-```
 
 ## Kiro Powers Writeup
 
@@ -139,6 +184,8 @@ We use 4 hooks in `.kiro/hooks/` to automate quality and consistency:
 - `mvp-scope.md` — Defined must-have vs stretch features with explicit build order, keeping focus on the core loop.
 - `product-principles.md` — "Teach before giving answers" principle prevented the tutor from becoming a code generator.
 - `local-data-privacy.md` — No cloud accounts, no full file uploads, SecretStorage for keys — kept the product privacy-conscious.
+- `adaptive-learning.md` — Defined all difficulty transition rules (incorrect → recover, correct while recovering → step up, 2 correct in a row → increase difficulty) so the engine matched the spec exactly.
+- `gamification.md` — Defined XP scoring (+5 attempt, +10 correct, +5 recovery bonus), level formula, and streak rules deterministically.
 - `gemini-prompts.md` — Standardized prompt structure across all AI calls.
 - `ai-output-contracts.md` — Required Zod validation on every Gemini response.
 
@@ -150,7 +197,9 @@ We use 4 hooks in `.kiro/hooks/` to automate quality and consistency:
 
 ### Vibe coding moments
 
-- Scaffolded the entire Zod contract system (TutorResponse, DocReference, quiz schemas, host/webview messages) in one conversation — contracts that would have taken hours to design manually.
+- Scaffolded the entire Zod contract system (TutorResponse, DocReference, quiz schemas, host/webview messages, quizFeedback) in one conversation — contracts that would have taken hours to design manually.
+- Built the full adaptive engine and gamification layer (7 pure functions, 49 unit tests) through spec-driven conversation, with the steering documents acting as the spec the agent implemented against.
+- Wired the complete answer submission bridge — webview click → host grading → state update → feedback message → UI render — by inspecting the existing message flow and filling only the missing pieces.
 - Iterated on Gemini prompt engineering across multiple rounds, testing structured JSON output with guardrails against solution-like responses.
 - Built the doc enricher pipeline (concept mapping → parallel fetch → quote extraction → response attachment) end-to-end through conversational coding in under 20 minutes.
 
