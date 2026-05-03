@@ -1,32 +1,25 @@
-import type { TutorResponse } from "../shared/contracts";
+import { TutorResponseSchema } from "../shared/contracts";
 
-export const mockTutorResponse: TutorResponse = {
+export const mockTutorResponse = TutorResponseSchema.parse({
   mode: "mock",
-  title: "Understanding a Function Step by Step",
+  title: "Understanding This Code",
   explanation:
-    "This code defines a small reusable function. It takes input, performs logic on that input, and returns a result. The important idea is to understand the data flow: what enters the function, what changes inside it, and what comes back out.",
-  keyConcepts: [
-    "Function input",
-    "Return value",
-    "Control flow",
-    "Readable naming",
-  ],
+    "This code introduces a basic programming idea and explains how the pieces work together.",
+  keyConcepts: ["variables", "functions"],
   quiz: [
     {
       id: "q1",
-      question: "What is the main purpose of a function?",
+      question: "What is the main purpose of this code?",
       options: [
-        { id: "a", text: "To group reusable logic" },
-        { id: "b", text: "To make code slower" },
-        { id: "c", text: "To delete variables" },
-        { id: "d", text: "To prevent imports" },
+        { id: "a", text: "To demonstrate a programming concept" },
+        { id: "b", text: "To delete project files" },
       ],
       correctOptionId: "a",
       explanation:
-        "Functions group reusable logic so the same behavior can be called from multiple places.",
+        "The code is meant to demonstrate a concept, not perform a destructive action.",
     },
   ],
   guardrail: {
     blocked: false,
   },
-};
+});
