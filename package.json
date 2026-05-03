@@ -1,0 +1,71 @@
+{
+  "name": "vybe-tutor",
+  "displayName": "Vybe Tutor",
+  "description": "A local-first AI coding tutor that helps students understand code through contextual explanations and comprehension checks.",
+  "version": "0.1.0",
+  "publisher": "vybe-team",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Education"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onView:vybeTutor.tutorView"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "vybeTutor.openTutorView",
+        "title": "Vybe Tutor: Open Tutor View"
+      },
+      {
+        "command": "vybeTutor.explainSelection",
+        "title": "Vybe Tutor: Explain Selection"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vybeTutor",
+          "title": "Vybe Tutor",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "vybeTutor": [
+        {
+          "type": "webview",
+          "id": "vybeTutor.tutorView",
+          "name": "Vybe Tutor"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p tsconfig.json",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "build:webview": "cd webview && npx vite build",
+    "watch": "tsc -watch -p tsconfig.json",
+    "test": "vitest run",
+    "vscode:prepublish": "npm run build && npm run build:webview"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.11.0",
+    "vitest": "^1.2.0",
+    "vite": "^5.0.12",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.33",
+    "autoprefixer": "^10.4.17",
+    "esbuild": "^0.19.12"
+  }
+}
