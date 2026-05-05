@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables - NEVER COMMIT
+.env
+.env.local
+*.env
+
+# IDE
+.vscode/*
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node / TypeScript
+node_modules/
+dist/
+*.tsbuildinfo
+*.vsix
+
+# Project specific
+*.db
+*.sqlite
+*.sqlite3
+*.log
+output/cache/
+uploads/temp/
+node_modules/
